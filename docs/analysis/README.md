@@ -17,6 +17,12 @@ Tài liệu nền tảng cho engine quyết định của bot. Mỗi file là 1 
 | [09-positioning.md](./09-positioning.md) | Hex grid, Zephyr/Shroud counter, diver counter, scout workflow, threat scoring |
 | [10-set18-depth.md](./10-set18-depth.md) | Wisps + EV math, Blossom greed, Elderwood plants, Blackthorn sacrifice, Eclipse |
 | [11-match-flow.md](./11-match-flow.md) | Round-by-round checklist, critical decision rounds, example lines, opponent reading |
+| [12-combat-math.md](./12-combat-math.md) | Damage pipeline, armor/MR formula, mana generation, AS cap, crit stacking, end-of-round damage |
+| [13-champion-stats.md](./13-champion-stats.md) | 9 top carry: stats base + ability + BIS (Azir, Kayle, Rengar, Draven, Kha'Zix, Elder Dragon, Elise, Nidalee, Veigar) |
+| [14-item-stats.md](./14-item-stats.md) | Carry/tank item stats chính xác, radiants, uniqueness rules, BIS lookup table |
+| [15-trait-numbers.md](./15-trait-numbers.md) | Blossom/Elderwood/Blackthorn/Eclipse/Executioner/Defender/Fae exact values |
+| [16-hidden-mechanics.md](./16-hidden-mechanics.md) | Targeting, pathfinding, mana lock, dodge, untargetable, summons, overcap, combat sim stub |
+| [17-patch-18.4-deltas.md](./17-patch-18.4-deltas.md) | Patch 18.4 exact deltas, B-patch changes, scraper refresh workflow, confidence levels |
 
 ## Headlines
 
