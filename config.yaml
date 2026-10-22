@@ -1,0 +1,24 @@
+db:
+  path: data/tft.db
+
+cdragon:
+  base_url: https://raw.communitydragon.org/latest
+  tft_json_path: /cdragon/tft/en_us.json
+  content_metadata: /content-metadata.json
+  timeout_sec: 30
+
+ddragon:
+  versions_url: https://ddragon.leagueoflegends.com/api/versions.json
+
+set:
+  current: 18
+  rollover_date: "2026-12-01"
+  next: 19
+
+refresh:
+  cdragon_cron: "0 */6 * * *"
+  patch_watcher_cron: "*/15 * * * *"
+  meta_comps_cron: "0 2,14 * * *"
+
+http:
+  user_agent: reverseiiiiing/0.1 (research)
