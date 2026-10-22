@@ -23,11 +23,15 @@ Tài liệu nền tảng cho engine quyết định của bot. Mỗi file là 1 
 | [15-trait-numbers.md](./15-trait-numbers.md) | Blossom/Elderwood/Blackthorn/Eclipse/Executioner/Defender/Fae exact values |
 | [16-hidden-mechanics.md](./16-hidden-mechanics.md) | Targeting, pathfinding, mana lock, dodge, untargetable, summons, overcap, combat sim stub |
 | [17-patch-18.4-deltas.md](./17-patch-18.4-deltas.md) | Patch 18.4 exact deltas, B-patch changes, scraper refresh workflow, confidence levels |
+| [18-patch-18.5.md](./18-patch-18.5.md) | **NEW** Patch 18.5 (2026-10-21): trait/champion/wisp/item changes, meta prediction |
+| [19-encounters.md](./19-encounters.md) | Set 18 encounters (Kayle/Ashe/Draven/Teemo/Karma/Kobuko/Ornn/Lux/Yunara/Vi) + comp scoring |
+| [20-scraper-targets.md](./20-scraper-targets.md) | CDragon + Riot API + meta-site URLs, scheduler config, initial SQLite schema |
+| [21-pve-rounds.md](./21-pve-rounds.md) | PvE round composition (Krugs/Wolves/Raptors/Dragon), drop expectations, opener planning |
 
 ## Headlines
 
 ### Set
-- **Set 18 Enchanted Wilds** · Patch **18.4** · Set 19 lands **2026-12-01**
+- **Set 18 Enchanted Wilds** · Patch **18.5** (2026-10-21) · Set 19 lands **2026-12-01**
 - **Wisps** = cơ chế chính, rightmost shop slot mỗi 2 round, planning phase only
 
 ### Econ
