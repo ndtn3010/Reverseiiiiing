@@ -25,6 +25,7 @@ dependencies = [
     "aiosqlite>=0.20",
     "rich>=13.7",
     "pynput>=1.7",
+    "pytesseract>=0.3.10",
 ]
 
 [project.optional-dependencies]

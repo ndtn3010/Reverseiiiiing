@@ -71,6 +71,20 @@ sanctioned by Riot. Use on a secondary account you can afford to lose.
 
 ## Install
 
+### End user (zero setup)
+
+1. Download `reverseiii-windows.zip` from
+   [latest release](https://github.com/ndtn3010/Reverseiiiiing/releases).
+2. Extract anywhere.
+3. Double-click `reverseiii.exe`.
+
+That's it. First launch auto-downloads TFT assets from CommunityDragon
+(champ icons, items, traits — ~30 MB), auto-detects your monitor
+resolution, and starts the overlay. No Python, no Tesseract, no manual
+screenshots required.
+
+### Developer
+
 ```bash
 # Windows (needs win extras for executor)
 pip install -e ".[win,vision,mcp]"
@@ -82,14 +96,19 @@ pip install -e ".[vision,mcp]"
 ## Run
 
 ```bash
-# Patch/meta scraper (run nightly via Task Scheduler / cron)
-reverseiii-scrape
-
-# MCP server (for Claude Desktop / Cursor integration)
-reverseiii-mcp
+# One-time bootstrap (end-user .exe does this on startup automatically)
+python -m reverseiiiiing.vision.bootstrap
 
 # Main overlay + executor
-reverseiii --config config/config.yaml
+reverseiii                         # auto-detects everything
+reverseiii --refresh-assets        # force re-download after new patch
+reverseiii --skip-bootstrap        # if offline
+
+# Patch/meta scraper (nightly)
+reverseiii-scrape
+
+# MCP server (for Claude Desktop)
+reverseiii-mcp
 ```
 
 ## External MCP servers (plug these into Claude Desktop)

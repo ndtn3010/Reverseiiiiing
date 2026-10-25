@@ -12,12 +12,40 @@ by linear ratio. For 2560×1440 or 3840×2160 the ratios hold.
 """
 from __future__ import annotations
 
+import os
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
 import cv2
 import numpy as np
+
+
+def _locate_tesseract() -> str | None:
+    """Find bundled or system tesseract.exe."""
+    bundled = Path(getattr(sys, "_MEIPASS", ".")) / "tesseract" / "tesseract.exe"
+    if bundled.exists():
+        return str(bundled)
+    exe_dir = Path(sys.argv[0]).resolve().parent / "tesseract" / "tesseract.exe"
+    if exe_dir.exists():
+        return str(exe_dir)
+    for candidate in (
+        r"C:\Program Files\Tesseract-OCR\tesseract.exe",
+        r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
+    ):
+        if os.path.exists(candidate):
+            return candidate
+    return None
+
+
+_TESS_PATH = _locate_tesseract()
+if _TESS_PATH:
+    try:
+        import pytesseract
+        pytesseract.pytesseract.tesseract_cmd = _TESS_PATH
+    except ImportError:
+        pass
 
 from reverseiiiiing.capture.screen import Region
 from reverseiiiiing.state.models import (

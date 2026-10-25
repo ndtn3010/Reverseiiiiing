@@ -27,20 +27,28 @@ jobs:
           pip install pyinstaller
           pip install -e ".[win,vision,mcp]"
 
-      - name: Install Tesseract OCR
+      - name: Download portable Tesseract
         run: |
-          choco install tesseract --no-progress -y
+          Invoke-WebRequest -Uri "https://github.com/UB-Mannheim/tesseract/releases/download/v5.4.0.20240606/tesseract-ocr-w64-setup-5.4.0.20240606.exe" -OutFile tesseract-setup.exe
+          Start-Process -FilePath .\tesseract-setup.exe -ArgumentList "/S /D=C:\tess" -Wait
+          New-Item -ItemType Directory -Force -Path tesseract
+          Copy-Item -Path "C:\tess\tesseract.exe" -Destination tesseract\
+          Copy-Item -Path "C:\tess\tessdata\eng.traineddata" -Destination tesseract\tessdata\ -Force -Recurse
+          Get-ChildItem -Path "C:\tess" -Filter "*.dll" | Copy-Item -Destination tesseract\
+          dir tesseract
 
       - name: Build main app (.exe)
         run: |
           pyinstaller --onefile --name reverseiii `
             --add-data "config/config.yaml;config" `
             --add-data "config/mcp_clients.example.json;config" `
+            --add-data "tesseract;tesseract" `
             --hidden-import=cv2 --hidden-import=mss `
             --hidden-import=PyQt6 --hidden-import=pynput `
             --hidden-import=pydirectinput --hidden-import=win32api `
             --hidden-import=pydantic --hidden-import=httpx `
             --hidden-import=bs4 --hidden-import=lxml `
+            --hidden-import=pytesseract `
             --collect-all PyQt6 `
             src/reverseiiiiing/__main__.py
 

@@ -5,7 +5,7 @@ mode: COACH_ONLY           # COACH_ONLY | SEMI_AUTO | FULL_AUTO
 tick_hz: 2                 # main loop rate (2 = every 500ms)
 
 capture:
-  resolution: [2560, 1440] # must match in-game resolution
+  resolution: [0, 0]       # [0, 0] = auto-detect primary monitor
   monitor: 1               # mss monitor index (1 = primary)
   live_client_url: "https://127.0.0.1:2999"
   live_client_poll_ms: 500

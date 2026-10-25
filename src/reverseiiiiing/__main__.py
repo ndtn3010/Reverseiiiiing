@@ -8,7 +8,7 @@ import threading
 from pathlib import Path
 
 from reverseiiiiing.capture.live_client import LiveClient
-from reverseiiiiing.capture.screen import ScreenCapture
+from reverseiiiiing.capture.screen import ScreenCapture, detect_primary_resolution
 from reverseiiiiing.decision.engine import DecisionEngine, EngineConfig
 from reverseiiiiing.executor.hotkeys import HotkeyManager
 from reverseiiiiing.executor.input_win import ExecutorConfig, InputExecutor
@@ -16,6 +16,7 @@ from reverseiiiiing.mcp_server.server import CACHE
 from reverseiiiiing.state.models import GameState
 from reverseiiiiing.utils.config import load_config
 from reverseiiiiing.utils.logger import get_logger
+from reverseiiiiing.vision import bootstrap as vb
 from reverseiiiiing.vision.detector import DetectorConfig, VisionDetector
 
 log = get_logger("reverseiii")
@@ -28,7 +29,13 @@ class App:
         self.tick_s = 1.0 / cfg.get("tick_hz", 2)
         self._pending_action = None
 
-        res = tuple(cfg["capture"]["resolution"])
+        # Auto-detect resolution if config says [0, 0] or missing
+        cfg_res = cfg.get("capture", {}).get("resolution") or [0, 0]
+        if cfg_res == [0, 0] or not cfg_res:
+            res = detect_primary_resolution()
+            log.info(f"Auto-detected resolution: {res[0]}×{res[1]}")
+        else:
+            res = tuple(cfg_res)
         self.screen = ScreenCapture(monitor=cfg["capture"]["monitor"])
         self.detector = VisionDetector(
             DetectorConfig(
@@ -130,12 +137,44 @@ class App:
                 await asyncio.sleep(self.tick_s)
 
 
+def _resolve_config_path(explicit: Path | None) -> Path:
+    """Find config.yaml next to the .exe (PyInstaller) or in cwd (dev)."""
+    if explicit and explicit.exists():
+        return explicit
+    candidates = [
+        Path("config/config.yaml"),
+        Path(getattr(sys, "_MEIPASS", ".")) / "config" / "config.yaml",
+        Path(sys.argv[0]).resolve().parent / "config" / "config.yaml",
+        Path(sys.argv[0]).resolve().parent / "config.yaml",
+    ]
+    for c in candidates:
+        if c.exists():
+            return c
+    raise FileNotFoundError(
+        "config.yaml not found. Place it next to reverseiii.exe."
+    )
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(prog="reverseiii")
-    ap.add_argument("--config", default="config/config.yaml", type=Path)
+    ap.add_argument("--config", default=None, type=Path)
+    ap.add_argument("--skip-bootstrap", action="store_true",
+                    help="Skip CommunityDragon asset download at startup")
+    ap.add_argument("--refresh-assets", action="store_true",
+                    help="Force re-download even if manifest is current")
     args = ap.parse_args()
 
-    cfg = load_config(args.config)
+    cfg_path = _resolve_config_path(args.config)
+    cfg = load_config(cfg_path)
+
+    # Zero-config: fetch assets on first run (and on patch bumps)
+    if not args.skip_bootstrap:
+        data_dir = Path(cfg.get("meta", {}).get("db_path", "data/meta.sqlite")).parent
+        try:
+            asyncio.run(vb.run(data_dir, refresh=args.refresh_assets))
+        except Exception as e:
+            log.warning(f"Bootstrap failed (will run with existing assets): {e}")
+
     app = App(cfg)
     try:
         asyncio.run(app.run())
