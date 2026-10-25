@@ -1,0 +1,36 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Data
+data/*.db
+data/screenshots/
+data/templates/
+data/models/
+!data/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Secrets
+.env
+config/local.yaml
+config/*.local.yaml
+
+# Logs
+logs/
+*.log
+
+# OS
+Thumbs.db

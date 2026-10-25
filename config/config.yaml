@@ -1,0 +1,51 @@
+# Reverseiiiiing main config
+# Copy to config/local.yaml and edit — local.yaml is gitignored.
+
+mode: COACH_ONLY           # COACH_ONLY | SEMI_AUTO | FULL_AUTO
+tick_hz: 2                 # main loop rate (2 = every 500ms)
+
+capture:
+  resolution: [2560, 1440] # must match in-game resolution
+  monitor: 1               # mss monitor index (1 = primary)
+  live_client_url: "https://127.0.0.1:2999"
+  live_client_poll_ms: 500
+  verify_ssl: false        # Riot's local server uses self-signed cert
+
+vision:
+  template_dir: data/templates
+  champ_match_threshold: 0.82
+  item_match_threshold: 0.85
+  use_yolo_fallback: false # true requires [vision] extras + trained model
+  yolo_model_path: data/models/tft-set14-yolov8n.pt
+
+meta:
+  db_path: data/meta.sqlite
+  scraper:
+    sources:
+      - name: metatft
+        url: "https://www.metatft.com/comps"
+      - name: tftacademy
+        url: "https://tftacademy.com/tierlist/comps"
+    patch_rss: "https://www.leagueoflegends.com/en-us/news/tags/teamfight-tactics-patch-notes/rss.xml"
+
+decision:
+  comp_match_min_score: 0.6
+  risk_tolerance: 0.5      # 0 = econ max, 1 = aggressive rolldown
+
+executor:
+  hotkey_toggle: F8        # show/hide overlay
+  hotkey_execute: F9       # SEMI_AUTO: confirm next action
+  hotkey_panic: ESC        # kill switch — stops all auto input
+  click_delay_ms: [60, 180]     # random range
+  move_duration_ms: [120, 320]  # random range for mouse travel
+  bezier_jitter: true
+
+overlay:
+  position: top_right
+  width: 320
+  opacity: 0.85
+  font_size: 13
+
+mcp:
+  server_name: "reverseiii"
+  log_level: INFO

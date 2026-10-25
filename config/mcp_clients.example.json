@@ -1,0 +1,24 @@
+{
+  "_comment": "Copy relevant sections into Claude Desktop / Cursor MCP config. All 3 servers are optional; add what you need.",
+  "mcpServers": {
+    "tft-oracle": {
+      "command": "npx",
+      "args": ["-y", "tft-oracle"],
+      "_note": "Static game data (champs, traits, items, augments). No API key needed."
+    },
+    "tft-history": {
+      "command": "npx",
+      "args": ["-y", "mcp-server-tft"],
+      "env": {
+        "RIOT_API_KEY": "REPLACE_ME",
+        "GAME_NAME": "YourSummonerName",
+        "TAG_LINE": "VN2"
+      },
+      "_note": "Post-match history via Riot API. Dev key expires in 24h; get a Personal Key for permanent access at developer.riotgames.com."
+    },
+    "reverseiii": {
+      "command": "reverseiii-mcp",
+      "_note": "Our own server: exposes live state, patch meta, and recommend_move tool."
+    }
+  }
+}
