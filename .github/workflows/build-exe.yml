@@ -1,0 +1,81 @@
+name: Build Windows .exe
+
+on:
+  push:
+    branches: [main, ccr-8ea5085d-5jgsxa]
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install build deps + project
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install -e ".[win,vision,mcp]"
+
+      - name: Install Tesseract OCR
+        run: |
+          choco install tesseract --no-progress -y
+
+      - name: Build main app (.exe)
+        run: |
+          pyinstaller --onefile --name reverseiii `
+            --add-data "config/config.yaml;config" `
+            --add-data "config/mcp_clients.example.json;config" `
+            --hidden-import=cv2 --hidden-import=mss `
+            --hidden-import=PyQt6 --hidden-import=pynput `
+            --hidden-import=pydirectinput --hidden-import=win32api `
+            --hidden-import=pydantic --hidden-import=httpx `
+            --hidden-import=bs4 --hidden-import=lxml `
+            --collect-all PyQt6 `
+            src/reverseiiiiing/__main__.py
+
+      - name: Build MCP server (.exe)
+        run: |
+          pyinstaller --onefile --name reverseiii-mcp `
+            --hidden-import=mcp `
+            src/reverseiiiiing/mcp_server/__main__.py
+
+      - name: Build scraper (.exe)
+        run: |
+          pyinstaller --onefile --name reverseiii-scrape `
+            src/reverseiiiiing/meta/__main__.py
+
+      - name: Package release zip
+        run: |
+          mkdir release
+          copy dist\reverseiii.exe release\
+          copy dist\reverseiii-mcp.exe release\
+          copy dist\reverseiii-scrape.exe release\
+          copy config\config.yaml release\
+          copy config\mcp_clients.example.json release\
+          copy README.md release\
+          Compress-Archive -Path release\* -DestinationPath reverseiii-windows.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: reverseiii-windows
+          path: reverseiii-windows.zip
+          retention-days: 30
+
+      - name: Create Release (tag only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: reverseiii-windows.zip
+          generate_release_notes: true
