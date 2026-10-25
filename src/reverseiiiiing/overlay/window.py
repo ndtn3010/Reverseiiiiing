@@ -12,9 +12,11 @@ from __future__ import annotations
 from typing import Optional
 
 try:
-    from PyQt6.QtCore import Qt, QTimer
+    from PyQt6.QtCore import Qt, QTimer, pyqtSignal
     from PyQt6.QtGui import QColor, QFont, QPalette
-    from PyQt6.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
+    from PyQt6.QtWidgets import (
+        QApplication, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget,
+    )
 except ImportError:  # pragma: no cover
     QApplication = None  # type: ignore
 
@@ -22,6 +24,8 @@ from reverseiiiiing.state.models import Action, GameState
 
 
 class OverlayWindow(QWidget):
+    settings_requested = pyqtSignal()
+
     def __init__(self, mode: str = "COACH_ONLY"):
         super().__init__()
         self.mode = mode
@@ -46,8 +50,20 @@ class OverlayWindow(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(14, 12, 14, 12)
 
+        header_row = QHBoxLayout()
         self.header = QLabel(f"Reverseiii · {self.mode}")
         self.header.setStyleSheet("color: #8aa; font-size: 11px;")
+        header_row.addWidget(self.header)
+        header_row.addStretch()
+        self.btn_settings = QPushButton("⚙")
+        self.btn_settings.setFixedSize(22, 22)
+        self.btn_settings.setStyleSheet(
+            "QPushButton { background: transparent; color: #889; "
+            "border: 1px solid #334; border-radius: 11px; }"
+            "QPushButton:hover { color: #ddd; border-color: #556; }"
+        )
+        self.btn_settings.clicked.connect(self.settings_requested.emit)
+        header_row.addWidget(self.btn_settings)
 
         self.state_line = QLabel("Waiting for game…")
         self.state_line.setStyleSheet("color: #ddd; font-size: 12px;")
@@ -67,7 +83,8 @@ class OverlayWindow(QWidget):
         self.hotkeys = QLabel("F8 hide · F9 execute · ESC panic")
         self.hotkeys.setStyleSheet("color: #556; font-size: 10px; margin-top: 6px;")
 
-        for w in (self.header, self.state_line, self.action_main,
+        layout.addLayout(header_row)
+        for w in (self.state_line, self.action_main,
                   self.action_secondary, self.hotkeys):
             layout.addWidget(w)
         layout.addStretch()

@@ -1,8 +1,15 @@
 # Reverseiiiiing main config
-# Copy to config/local.yaml and edit — local.yaml is gitignored.
+# User-editable values live in config/config.local.yaml, written by the
+# first-run wizard. Don't edit this file.
 
 mode: COACH_ONLY           # COACH_ONLY | SEMI_AUTO | FULL_AUTO
 tick_hz: 2                 # main loop rate (2 = every 500ms)
+
+user:
+  summoner_name: ""        # filled by first-run wizard
+  tag_line: ""
+  region: "vn2"
+  riot_api_key: ""         # optional; enables match-history MCP tools
 
 capture:
   resolution: [0, 0]       # [0, 0] = auto-detect primary monitor

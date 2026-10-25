@@ -75,14 +75,33 @@ class App:
     def _init_overlay(self) -> None:
         try:
             from PyQt6.QtWidgets import QApplication
+            from reverseiiiiing.overlay.settings_dialog import (
+                SettingsDialog, UserSettings, write_local_yaml,
+            )
             from reverseiiiiing.overlay.window import OverlayWindow
-            # Run Qt in a background thread; main loop stays asyncio.
+
             def _run():
                 self._qt_app = QApplication(sys.argv)
                 self.overlay = OverlayWindow(self.mode)
                 self.overlay.place_top_right(self.cfg["capture"]["resolution"][0])
+
+                def _open_settings():
+                    s = UserSettings.from_config(self.cfg)
+                    dlg = SettingsDialog(s, parent=self.overlay)
+                    if dlg.exec():
+                        from pathlib import Path as _P
+                        from reverseiiiiing.utils.config import load_config as _lc
+                        write_local_yaml(
+                            _P("config/config.local.yaml"), dlg.settings,
+                        )
+                        self.cfg = _lc("config/config.yaml")
+                        self.mode = self.cfg.get("mode", "COACH_ONLY")
+                        self.overlay.header.setText(f"Reverseiii · {self.mode}")
+
+                self.overlay.settings_requested.connect(_open_settings)
                 self.overlay.show()
                 self._qt_app.exec()
+
             t = threading.Thread(target=_run, daemon=True)
             t.start()
         except ImportError:
@@ -137,6 +156,30 @@ class App:
                 await asyncio.sleep(self.tick_s)
 
 
+def _local_config_path(main_cfg: Path) -> Path:
+    return main_cfg.with_name(main_cfg.stem + ".local" + main_cfg.suffix)
+
+
+def _ensure_user_settings(cfg: dict, cfg_path: Path) -> dict:
+    """Open first-run wizard if user section is empty. Returns reloaded cfg."""
+    user = (cfg.get("user") or {})
+    needed = ("summoner_name", "tag_line", "region")
+    if all(user.get(k) for k in needed):
+        return cfg
+    try:
+        from reverseiiiiing.overlay.settings_dialog import run_first_run_wizard
+    except ImportError:
+        log.warning("PyQt6 missing; skipping first-run wizard.")
+        return cfg
+    local = _local_config_path(cfg_path)
+    log.info("First-run: opening settings dialog…")
+    saved = run_first_run_wizard(local, cfg)
+    if saved is None:
+        log.error("First-run cancelled. Exiting.")
+        sys.exit(1)
+    return load_config(cfg_path)
+
+
 def _resolve_config_path(explicit: Path | None) -> Path:
     """Find config.yaml next to the .exe (PyInstaller) or in cwd (dev)."""
     if explicit and explicit.exists():
@@ -166,6 +209,7 @@ def main() -> int:
 
     cfg_path = _resolve_config_path(args.config)
     cfg = load_config(cfg_path)
+    cfg = _ensure_user_settings(cfg, cfg_path)
 
     # Zero-config: fetch assets on first run (and on patch bumps)
     if not args.skip_bootstrap:
