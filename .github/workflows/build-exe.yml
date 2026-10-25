@@ -27,15 +27,21 @@ jobs:
           pip install pyinstaller
           pip install -e ".[win,vision,mcp]"
 
-      - name: Download portable Tesseract
+      - name: Install Tesseract via chocolatey
         run: |
-          Invoke-WebRequest -Uri "https://github.com/UB-Mannheim/tesseract/releases/download/v5.4.0.20240606/tesseract-ocr-w64-setup-5.4.0.20240606.exe" -OutFile tesseract-setup.exe
-          Start-Process -FilePath .\tesseract-setup.exe -ArgumentList "/S /D=C:\tess" -Wait
-          New-Item -ItemType Directory -Force -Path tesseract
-          Copy-Item -Path "C:\tess\tesseract.exe" -Destination tesseract\
-          Copy-Item -Path "C:\tess\tessdata\eng.traineddata" -Destination tesseract\tessdata\ -Force -Recurse
-          Get-ChildItem -Path "C:\tess" -Filter "*.dll" | Copy-Item -Destination tesseract\
+          choco install tesseract --no-progress -y
+          $tessRoot = "C:\Program Files\Tesseract-OCR"
+          if (-not (Test-Path "$tessRoot\tesseract.exe")) {
+            Write-Error "Tesseract missing at expected path"
+            exit 1
+          }
+          New-Item -ItemType Directory -Force -Path tesseract\tessdata | Out-Null
+          Copy-Item -Path "$tessRoot\tesseract.exe" -Destination tesseract\
+          Copy-Item -Path "$tessRoot\*.dll" -Destination tesseract\
+          Copy-Item -Path "$tessRoot\tessdata\eng.traineddata" -Destination tesseract\tessdata\
+          Copy-Item -Path "$tessRoot\tessdata\osd.traineddata" -Destination tesseract\tessdata\ -ErrorAction SilentlyContinue
           dir tesseract
+          dir tesseract\tessdata
 
       - name: Build main app (.exe)
         run: |
